@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+
+<head>
+
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ChatFollowersFriend</title>
+
+  <script type="module">
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-app.js";
+    import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-auth.js";
+    import { getFirestore, collection, addDoc, query, orderBy, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/9.23.0/firebase-firestore.js";
+    
+    const firebaseConfig = {
+      apiKey: "AIzaSyD-EXEMPLODECHAVE_API-AQUI",
+      authDomain: "chatflowersfriend.firebaseapp.com",
+      projectId: "chatflowersfriend",
+      storageBucket: "chatflowersfriend.appspot.com",
+      messagingSenderId: "1234567890",
+      appId: "1:1234567890:web:abcdef123456"
+    };
+
+    const app = initializeApp(firebaseConfig);
+    const auth = getAuth(app);
+    const db = getFirestore(app);
+
+    window.addEventListener("DOMContentLoaded", () => {
+      const loginForm = document.getElementById("loginForm");
+      const registerForm = document.getElementById("registerForm");
+      const postForm = document.getElementById("postForm");
+      const postFeed = document.getElementById("postFeed");
+
+      if (loginForm) {
+        loginForm.addEventListener("submit", (e) => {
+          e.preventDefault();
+          const email = document.getElementById("loginEmail").value;
+          const password = document.getElementById("loginPassword").value;
+          signInWithEmailAndPassword(auth, email, password)
+            .then(() => alert("Login realizado!"))
+            .catch(error => alert("Erro ao entrar: " + error.message));
+        });
+      }
+
+      if (registerForm) {
+        registerForm.addEventListener("submit", (e) => {
+          e.preventDefault();
+          const email = document.getElementById("registerEmail").value;
+          const password = document.getElementById("registerPassword").value;
+          createUserWithEmailAndPassword(auth, email, password)
+            .then(() => alert("Cadastro realizado!"))
+            .catch(error => alert("Erro ao cadastrar: " + error.message));
+        });
+      }
+
+      if (postForm && postFeed) {
+        postForm.addEventListener("submit", async (e) => {
+          e.preventDefault();
+          const texto = document.getElementById("postText").value;
+          try {
+            await addDoc(collection(db, "posts"), {
+              texto,
+              timestamp: serverTimestamp()
+            });
+            postForm.reset();
+          } catch (error) {
+            if (error.code === "permission-denied") {
+              alert("Erro de permissão: verifique as regras de segurança no console do Firebase (Firestore > Regras). Exemplo para testes:\n\nrules_version = '2';\nservice cloud.firestore {\n  match /databases/{database}/documents {\n    match /posts/{postId} {\n      allow read, write: if request.auth != null;\n    }\n  }\n}");
+            } else {
+              alert("Erro ao publicar: " + error.message);
+            }
+          }
+        });
+
+        const q = query(collection(db, "posts"), orderBy("timestamp", "desc"));
+        onSnapshot(q, (snapshot) => {
+          postFeed.innerHTML = "";
+          snapshot.forEach(doc => {
+            const post = doc.data();
+            const div = document.createElement("div");
+            div.className = "post";
+            div.innerHTML = `
+              <p>${post.texto}</p>
+              <div class="post-actions">
+                <button onclick="alert('Você curtiu!')">👍 Curtir</button>
+                <button onclick="alert('Você adorou!')">❤️ Adoro</button>
+                <button onclick="alert('Comentário ainda não implementado.')">💬 Comentar</button>
+                <button onclick="alert('Compartilhado!')">🔗 Compartilhar</button>
+              </div>
+            `;
+            postFeed.appendChild(div);
+          });
+        }, error => {
+          if (error.code === "permission-denied") {
+            alert("Erro de permissão ao carregar o feed: verifique as regras de segurança no console do Firebase.");
+          } else {
+            alert("Erro ao carregar publicações: " + error.message);
+          }
+        });
+      }
+    });
+  </script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: linear-gradient(to bottom right, #21292b, #1a2023);
+      margin: 0;
+      padding: 0;
+      color: #333;
+    }
+    .h3 {
+      color: #ffffff;
+      text-align: center;
+    }
+   
+      .h6 {
+      color: #ffffff;
+      text-align: center;
+    }
+    
+    form {
+      margin: 10px 0;
+    }
+    input, button, textarea {
+      display: block;
+      margin: 10px auto;
+      padding: 10px;
+      width: 90%;
+      max-width: 400px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    .post {
+      background: #fff;
+      border-radius: 8px;
+      padding: 10px;
+      margin: 10px auto;
+      max-width: 500px;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    .post-actions {
+      display: flex;
+      justify-content: space-around;
+      margin-top: 10px;
+    }
+    button {
+      background: #ff0000;
+      color: white;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+    }
+    button:hover {
+      background: #039aff;
+    }
+a {
+    color: #039aff;
+    text-align: center;
+}
+    
+
+  </style>
+            </head>
+<body>
+          <header>
+            
+<section class="post-actions">
+    <a href="Sobre.html">Sobre</a>
+    <a href="Activity.html">Actividades</a>
+    <a href="Service.html">Nossos Serviços</a>
+    <a href="cal.html">Contactos</a> 
+</section>
+            </header>
+<section id="cadastro" class="register">
+
+    <h3 class="h3">Iniciar Sessão</h3>
+
+    <form id="registerForm">
+          <input type="call" type="email" id="registerCallEmail" placeholder="Telefone ou Email" required> 
+      <input type="password" id="registerPassword" placeholder="Senha" required>
+      <button type="submit">Entrar</button>
+
+    </form>
+  </section>
+<h6 class="h6">Já Tem Uma Conta?
+    <a href="CadastroZ.html">Clique Aqui</a>
+<h6 class="h6">Para Criar Conta</h6> </h6>
+    
+
+
+<p class="h3">Todos Os Direitos Reservados!.</p>
+  <footer class="h3">
+    <p>&copy; 2025 Floriano Saqui</p>
+  </footer>
+</body>
